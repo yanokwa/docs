@@ -58,9 +58,9 @@ If you want to directly send emails from your Central installation, the `mail-te
 Preview could not connect with server
 -------------------------------------
 
-You may run into a "Could not connect with Server" error message when previewing forms. This error message is typically because your host machine has not made its DNS servers available to Central.
+You may run into a "Could not connect with Server" error message when previewing forms. This error message is typically because your host machine has not made its domain name servers available to Central.
 
-To resolve this problem, first identify your upstream DNS servers. Run ``cat /run/systemd/resolve/resolv.conf`` to see your current list of nameservers with their IP addresses. They will look like this:
+To resolve this problem, first identify your upstream domain name servers. Run ``cat /run/systemd/resolve/resolv.conf`` to see your current list of nameservers with their IP addresses. They will look like this:
 
   .. code-block:: console
 
@@ -68,7 +68,7 @@ To resolve this problem, first identify your upstream DNS servers. Run ``cat /ru
 	nameserver 9.8.7.6
 
 
-Now, run ``nano /etc/docker/daemon.json`` to make those nameservers and, optionally, the Google DNS (8.8.8.8) as a fallback available to Docker. Put the following in the ``daemon.json`` file.
+Now, run ``nano /etc/docker/daemon.json`` to make those nameservers and, optionally, the Google DNS (8.8.8.8) available to Docker. Put the following in the ``daemon.json`` file.
 
   .. code-block:: console
 
