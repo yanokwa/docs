@@ -79,69 +79,6 @@ You can also refer to the current question or to the current question's parent g
   ., current question's value, . >= 18, Used in :ref:`constraints <constraints>`.
   \.\., current question's parent group, position(..), Used with :func:`position` to get a parent repeat instance's index.
 
-.. _xpath-paths:
-
--Advanced: XPath paths
--~~~~~~~~~~~~~~~~~~~~~~
-
-The ``${}`` notation in XLSForm is a convenient shortcut to refer to a specific field. When an XLSForm is converted, ``${}`` references are expanded to XPath paths which describe where the field is located in the form.
-
-Some tools like ODK Build do not support ``${}`` notation so XPath notation must be used. Even in XLSForm, it can be advantageous to use XPath notation, especially in the context of :ref:`repeats <repeats>` or :doc:`datasets <form-datasets>`. The ``${}`` and XPath notations can be mixed freely.
-
-One way to think about XPath is that it sees a form or dataset like a series of folders and files on your computer. Questions are like files while :ref:`groups <groups>` and :ref:`repeats <repeats>` are like folders because they can contain other elements. Path elements are separated by `/`. Imagine a form with a group with name ``outer`` which contains another group with name ``inner`` which contains a question with name ``q1``. The absolute path to ``q1`` is ``/data/outer/inner/q1``.
-
-The ``data`` in the example above is the name of the form root. This root is named ``data`` by default but can be modified by adding a :th:`name` column in the XLSForm **settings** sheet and specifying a value below it. This is rarely needed. The ``/`` at the start of the path indicates that the path is absolute.
-
-XPath paths can also be relative. For example, let's say there's a ``relevance`` expression for ``q1`` in the example above and that this expression refers to a question with name ``age`` in the ``outer`` group. We could refer to it using an absolute expression: ``/data/outer/age``. We could also write a relative expression: ``../../age``.
-
-The ``../..`` part of the relative expression says to go up two levels from the current position of ``/data/outer/inner/q1``. The first ``..`` goes up one level to ``/data/outer/inner`` and then the second ``..`` goes up another level to ``/data/outer/``. We want to access a question in the ``outer`` group so we add that question's name to get ``../../age``.
- 
-ODK tools support a subset of XPath described `in the ODK XForms specification <https://getodk.github.io/xforms-spec/#xpath-paths>`_.
-
-.. _xpath-predicates-for-filtering:
-
-XPath predicates for filtering
-"""""""""""""""""""""""""""""""
-
-In :ref:`repeats <repeats>` and :doc:`datasets <form-datasets>`, an XPath path can refer to multiple nodes. This is called a nodeset. XPath predicates are ``True``/``False`` (boolean) expressions in square brackets that filter the nodeset they come after. When you define a :ref:`choice filter <cascading-selects>` for a select, that expression is used as an XPath predicate to filter the choice items.
-
-You can also write your own expressions with predicates. For example, consider a form with a repeat with name ``people`` and a question inside with name ``age`` (see :ref:`XPath paths for repeats <xpath-paths-for-repeats>` for the form definition). The expression ``/data/people[age < 18]`` evaluates to a nodeset that includes all instances of the ``people`` repeat for which the value of the ``age`` question is less than 18. ``age`` in the predicate is a relative expression evaluated in the context of each node in the nodeset. In this case, the relative expression ``age`` is evaluated in the context of ``/data/people``, giving the path expression ``/data/people/age``. This means that ``/data/people/age`` is compared to 18 for every ``people`` repeat instance.
-
-You can add more path steps after a predicate. For example, ``/data/people[age < 18]/pet_count`` evaluates to a nodeset that includes all the pet counts for instances of the ``people`` repeat that have ``age`` values under 18. Nodesets can be passed in to functions like :func:`sum` or other :ref:`functions that take nodeset arguments <repeat-functions>`.
-
-Sometimes forms may use :ref:`groups <groups>` to organize question sections within repeats. Those groups must be accounted for in predicates. If the ``age`` question were nested in a group called ``inner``, the predicate expression would need to be ``inner/age < 18``. Additionally, if the ``pet_count`` question were nested in a group called ``details``, the full expression would be ``/data/people[inner/age < 18]/details/pet_count``.
-
-XPath predicates are also the way to reference specific values in a :doc:`dataset <form-datasets>`. Learn more in the section on :ref:`referencing values in datasets <referencing-values-in-datasets>`.
-
-
-.. _xpath-paths-for-repeats:
-
-XPath paths for repeats
-""""""""""""""""""""""""
-
-When a form definition includes a :ref:`repeat <repeats>`, corresponding filled forms will have 0 or more instances of that repeat. Using the file and folder analogy described above, each repeat instance is like a folder and all of these folders have the name of the :ref:`repeat <repeats>`. Repeat instances are differentiated by their index (first, second, ...).
-
-When writing expressions within a repeat, it can be helpful to use the position of the repeat instance an enumerator is currently filling out. This can be done by using the :func:`position` function. One context in which this is useful is if you want to first collect a roster of people or things and then ask additional questions about each of those. As shown in the example in the :func:`position`, you can use a first repeat for the roster and then a second repeat that references items in the first repeat based on their position.
-
-Another use of the ``position`` function is to access a preceding repeat instance. See an example of this in the section on :ref:`dynamic defaults in repeats <dynamic-defaults-repeats>`.
-
-XPath paths can be useful to reference some or all repeat instances from outside the repeat. XPath notation is particularly helpful for filtering repeat instances, for example to provide a summary from data collected in repeats:
-
-.. rubric:: XLSForm
-
-.. csv-table:: survey
-  :header: type, name, label, calculation
-
-  begin repeat, people, Person,
-  int, age, Age,
-  int, pet_count, How many pets does this person have?
-  end repeat, people, ,
-
-  int, total_pets, , sum(${people}[age < 18]/pet_count)
-  note, total_note, Total pets owned by children: ${total_pets}
-
-In the path expression ``${people}[age < 18]/pet_count``, ``${people}`` uses ``${}`` notation to refer to all of the instances of the repeat. You could also expand this to the XPath path of `/data/people`. See the section on :ref:`XPath predicate <xpath-predicates-for-filtering>` for more details. In this example, the ``total_pets`` value is  displayed to the user. It could be used in many different contexts such as to define the :ref:`relevance <relevants>` of a group if there's a section of questions that only need to be filled out if there are more than one child-owned pets in the community.
-
 .. _expressions:
   
 Expressions
@@ -214,6 +151,70 @@ you must first use a :tc:`calculate` row and then a variable.
   note, tip_18_note, "| Bill: $${bill_amount}
   | Tip (18%): $${tip_18}
   | Total: $${tip_18_total}",
+
+
+.. _xpath-paths:
+
+XPath paths
+-----------
+
+The ``${}`` notation in XLSForm is a convenient shortcut to refer to a specific field. When an XLSForm is converted, ``${}`` references are expanded to XPath paths which describe where the field is located in the form.
+
+Some tools like ODK Build do not support ``${}`` notation so XPath notation must be used. Even in XLSForm, it can be advantageous to use XPath notation, especially in the context of :ref:`repeats <repeats>` or :doc:`datasets <form-datasets>`. The ``${}`` and XPath notations can be mixed freely.
+
+One way to think about XPath is that it sees a form or dataset like a series of folders and files on your computer. Questions are like files while :ref:`groups <groups>` and :ref:`repeats <repeats>` are like folders because they can contain other elements. Path elements are separated by `/`. Imagine a form with a group with name ``outer`` which contains another group with name ``inner`` which contains a question with name ``q1``. The absolute path to ``q1`` is ``/data/outer/inner/q1``.
+
+The ``data`` in the example above is the name of the form root. This root is named ``data`` by default but can be modified by adding a :th:`name` column in the XLSForm **settings** sheet and specifying a value below it. This is rarely needed. The ``/`` at the start of the path indicates that the path is absolute.
+
+XPath paths can also be relative. For example, let's say there's a ``relevance`` expression for ``q1`` in the example above and that this expression refers to a question with name ``age`` in the ``outer`` group. We could refer to it using an absolute expression: ``/data/outer/age``. We could also write a relative expression: ``../../age``.
+
+The ``../..`` part of the relative expression says to go up two levels from the current position of ``/data/outer/inner/q1``. The first ``..`` goes up one level to ``/data/outer/inner`` and then the second ``..`` goes up another level to ``/data/outer/``. We want to access a question in the ``outer`` group so we add that question's name to get ``../../age``.
+ 
+ODK tools support a subset of XPath described `in the ODK XForms specification <https://getodk.github.io/xforms-spec/#xpath-paths>`_.
+
+.. _xpath-predicates-for-filtering:
+
+XPath predicates for filtering
+"""""""""""""""""""""""""""""""
+
+In :ref:`repeats <repeats>` and :doc:`datasets <form-datasets>`, an XPath path can refer to multiple nodes. This is called a nodeset. XPath predicates are ``True``/``False`` (boolean) expressions in square brackets that filter the nodeset they come after. When you define a :ref:`choice filter <cascading-selects>` for a select, that expression is used as an XPath predicate to filter the choice items.
+
+You can also write your own expressions with predicates. For example, consider a form with a repeat with name ``people`` and a question inside with name ``age`` (see :ref:`XPath paths for repeats <xpath-paths-for-repeats>` for the form definition). The expression ``/data/people[age < 18]`` evaluates to a nodeset that includes all instances of the ``people`` repeat for which the value of the ``age`` question is less than 18. ``age`` in the predicate is a relative expression evaluated in the context of each node in the nodeset. In this case, the relative expression ``age`` is evaluated in the context of ``/data/people``, giving the path expression ``/data/people/age``. This means that ``/data/people/age`` is compared to 18 for every ``people`` repeat instance.
+
+You can add more path steps after a predicate. For example, ``/data/people[age < 18]/pet_count`` evaluates to a nodeset that includes all the pet counts for instances of the ``people`` repeat that have ``age`` values under 18. Nodesets can be passed in to functions like :func:`sum` or other :ref:`functions that take nodeset arguments <repeat-functions>`.
+
+Sometimes forms may use :ref:`groups <groups>` to organize question sections within repeats. Those groups must be accounted for in predicates. If the ``age`` question were nested in a group called ``inner``, the predicate expression would need to be ``inner/age < 18``. Additionally, if the ``pet_count`` question were nested in a group called ``details``, the full expression would be ``/data/people[inner/age < 18]/details/pet_count``.
+
+XPath predicates are also the way to reference specific values in a :doc:`dataset <form-datasets>`. Learn more in the section on :ref:`referencing values in datasets <referencing-values-in-datasets>`.
+
+
+.. _xpath-paths-for-repeats:
+
+XPath paths for repeats
+""""""""""""""""""""""""
+
+When a form definition includes a :ref:`repeat <repeats>`, corresponding filled forms will have 0 or more instances of that repeat. Using the file and folder analogy described above, each repeat instance is like a folder and all of these folders have the name of the :ref:`repeat <repeats>`. Repeat instances are differentiated by their index (first, second, ...).
+
+When writing expressions within a repeat, it can be helpful to use the position of the repeat instance an enumerator is currently filling out. This can be done by using the :func:`position` function. One context in which this is useful is if you want to first collect a roster of people or things and then ask additional questions about each of those. As shown in the example in the :func:`position`, you can use a first repeat for the roster and then a second repeat that references items in the first repeat based on their position.
+
+Another use of the ``position`` function is to access a preceding repeat instance. See an example of this in the section on :ref:`dynamic defaults in repeats <dynamic-defaults-repeats>`.
+
+XPath paths can be useful to reference some or all repeat instances from outside the repeat. XPath notation is particularly helpful for filtering repeat instances, for example to provide a summary from data collected in repeats:
+
+.. rubric:: XLSForm
+
+.. csv-table:: survey
+  :header: type, name, label, calculation
+
+  begin repeat, people, Person,
+  int, age, Age,
+  int, pet_count, How many pets does this person have?
+  end repeat, people, ,
+
+  int, total_pets, , sum(${people}[age < 18]/pet_count)
+  note, total_note, Total pets owned by children: ${total_pets}
+
+In the path expression ``${people}[age < 18]/pet_count``, ``${people}`` uses ``${}`` notation to refer to all of the instances of the repeat. You could also expand this to the XPath path of `/data/people`. See the section on :ref:`XPath predicate <xpath-predicates-for-filtering>` for more details. In this example, the ``total_pets`` value is  displayed to the user. It could be used in many different contexts such as to define the :ref:`relevance <relevants>` of a group if there's a section of questions that only need to be filled out if there are more than one child-owned pets in the community.
 
 .. _last-saved:
 
