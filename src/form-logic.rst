@@ -216,32 +216,6 @@ XPath paths can be useful to reference some or all repeat instances from outside
 
 In the path expression ``${people}[age < 18]/pet_count``, ``${people}`` uses ``${}`` notation to refer to all of the instances of the repeat. You could also expand this to the XPath path of `/data/people`. See the section on :ref:`XPath predicate <xpath-predicates-for-filtering>` for more details. In this example, the ``total_pets`` value is  displayed to the user. It could be used in many different contexts such as to define the :ref:`relevance <relevants>` of a group if there's a section of questions that only need to be filled out if there are more than one child-owned pets in the community.
 
-.. _last-saved:
-
-Values from the last saved record
-----------------------------------
-
-.. warning::
-
-  Support for last-saved was added in Collect v1.21.0. Form conversion requires XLSForm Online ≥ v2.0.0 or pyxform ≥ v1.0.0. Using older versions will have unpredictable results.
-
-You can refer to values from the last saved record of this form definition:
-
-:tc:`${last-saved#question-name}`
-
-This can be very useful when an enumerator has to enter the same value for multiple consecutive records. An example of this would be entering in the same district for a series of households.
-
-.. rubric:: XLSForm that shows using a last-saved value as a dynamic default
-
-.. csv-table:: survey
-  :header: type, name, label, default
-
-  text, street, Street, ${last-saved#street}
-
-The value is pulled from the last saved record. This is often the most recently created record but it could also be a previously-existing record that was edited and saved. For the first record ever saved for a form definition, the last saved value for any field will be blank.
-
-Questions of any type can have their defaults set based on the last saved record. References to the last saved record can be used as part of any expression wherever expressions are allowed.
-
 .. _form-logic-gotchas:
 
 Form logic gotchas
@@ -465,6 +439,32 @@ In the example above, when a participant is selected, his or her phone number is
 .. note::
 
   The ``true()`` in the :th:`choice_filter` column for the ``select_one`` in the example above is necessary to be able to look up participants' phone numbers. This is currently needed to overcome a ``pyxform`` bug.
+
+.. _last-saved:
+
+Values from the last saved record
+==================================
+
+.. warning::
+
+  Support for last-saved was added in Collect v1.21.0. Form conversion requires XLSForm Online ≥ v2.0.0 or pyxform ≥ v1.0.0. Using older versions will have unpredictable results.
+
+You can refer to values from the last saved record of this form definition:
+
+:tc:`${last-saved#question-name}`
+
+This can be very useful when an enumerator has to enter the same value for multiple consecutive records. An example of this would be entering in the same district for a series of households.
+
+.. rubric:: XLSForm that shows using a last-saved value as a dynamic default
+
+.. csv-table:: survey
+  :header: type, name, label, default
+
+  text, street, Street, ${last-saved#street}
+
+The value is pulled from the last saved record. This is often the most recently created record but it could also be a previously-existing record that was edited and saved. For the first record ever saved for a form definition, the last saved value for any field will be blank.
+
+Questions of any type can have their defaults set based on the last saved record. References to the last saved record can be used as part of any expression wherever expressions are allowed.
 
 .. _triggering_calculations_on_value_change:
 
