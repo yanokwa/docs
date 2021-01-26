@@ -81,8 +81,8 @@ You can also refer to the current question or to the current question's parent g
 
 .. _xpath-paths:
 
-Advanced: XPath paths
-~~~~~~~~~~~~~~~~~~~~~~
+-Advanced: XPath paths
+-~~~~~~~~~~~~~~~~~~~~~~
 
 The ``${}`` notation in XLSForm is a convenient shortcut to refer to a specific field. When an XLSForm is converted, ``${}`` references are expanded to XPath paths which describe where the field is located in the form.
 
@@ -103,9 +103,9 @@ ODK tools support a subset of XPath described `in the ODK XForms specification <
 XPath predicates for filtering
 """""""""""""""""""""""""""""""
 
-In :ref:`repeats <repeats>` and :doc:`datasets <form-datasets>`, an XPath path can refer to multiple nodes. This is called a nodeset. XPath predicates are True/False (boolean) expressions in square brackets that filter the nodeset they come after. When you define a :ref:`choice filter <cascading-selects>` for a select, that expression is used as an XPath predicate to filter the choice items.
+In :ref:`repeats <repeats>` and :doc:`datasets <form-datasets>`, an XPath path can refer to multiple nodes. This is called a nodeset. XPath predicates are ``True``/``False`` (boolean) expressions in square brackets that filter the nodeset they come after. When you define a :ref:`choice filter <cascading-selects>` for a select, that expression is used as an XPath predicate to filter the choice items.
 
-You can also write your own expressions with predicates. For example, consider a form with a repeat with name ``people`` and a question inside with name ``age`` (see :ref:`XPath paths for repeats <xpath-paths-for-repeats>` for the form definition). The expression ``/data/people[age < 18]`` evaluates to a nodeset that includes all instances of the ``repeat`` instance for which the value of the ``age`` question is less than 18. ``age`` in the predicate is a relative expression evaluated in the context of each node in the nodeset. In this case, the relative expression ``age`` is evaluated in the context of ``/data/people``, giving the path expression ``/data/people/age``. This means that ``/data/people/age`` is compared to 18 for every ``people`` repeat instance.
+You can also write your own expressions with predicates. For example, consider a form with a repeat with name ``people`` and a question inside with name ``age`` (see :ref:`XPath paths for repeats <xpath-paths-for-repeats>` for the form definition). The expression ``/data/people[age < 18]`` evaluates to a nodeset that includes all instances of the ``people`` repeat for which the value of the ``age`` question is less than 18. ``age`` in the predicate is a relative expression evaluated in the context of each node in the nodeset. In this case, the relative expression ``age`` is evaluated in the context of ``/data/people``, giving the path expression ``/data/people/age``. This means that ``/data/people/age`` is compared to 18 for every ``people`` repeat instance.
 
 You can add more path steps after a predicate. For example, ``/data/people[age < 18]/pet_count`` evaluates to a nodeset that includes all the pet counts for instances of the ``people`` repeat that have ``age`` values under 18. Nodesets can be passed in to functions like :func:`sum` or other :ref:`functions that take nodeset arguments <repeat-functions>`.
 
